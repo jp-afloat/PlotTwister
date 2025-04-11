@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from dotenv import load_dotenv
-from src.supabase_client import fetch_data_from_table
-from src.llama_index_setup import build_index_from_docs
-from src.gemini_client import ask_gemini
+#from src.supabase_client import fetch_data_from_table
+#from src.llama_index_setup import build_index_from_docs
+#from src.gemini_client import ask_gemini
 import os
 from src.azure_openai_client import ask_azure_openai
 
@@ -18,6 +18,7 @@ def read_root():
         "google_api_key_present": bool(os.getenv("GEMINI_API_KEY")),
     }
 
+'''
 @app.get("/ask")
 def ask_question(
     question: str = "What can you tell me about this data?",
@@ -42,3 +43,4 @@ def ask_question(
         "llamaindex_summary": summary,
         f"{model_provider}_insights": response
     }
+    '''
