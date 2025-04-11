@@ -1,0 +1,22 @@
+[project]
+name = "plottwisterbackend"
+version = "0.1.0"
+description = "plots for fun"
+authors = [
+    {name = "Lishuai Jing, Jonathan Peterson, Marti"}
+]
+readme = "README.md"
+requires-python = ">=3.11, <3.13"
+dependencies = [
+    "google-generativeai (>=0.8.4,<0.9.0)",
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "fastapi (>=0.115.12,<0.116.0)",
+    "uvicorn (>=0.34.0,<0.35.0)",
+    "llama-index (>=0.12.30,<0.13.0)",
+    "supabase (>=2.15.0,<3.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
