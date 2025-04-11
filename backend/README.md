@@ -25,3 +25,7 @@ cd PlotTwister/backend
 Use Poetry to install the required dependencies:
 
 poetry install
+
+## to run the backend
+
+poetry run uvicorn src.main:app --reload
