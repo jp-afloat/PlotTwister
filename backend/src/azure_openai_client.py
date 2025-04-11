@@ -7,11 +7,6 @@ load_dotenv()
 AZURE_API_KEY = os.getenv("AZURE_OPENAI_API_KEY")
 AZURE_ENDPOINT = os.getenv("AZURE_OPENAI_ENDPOINT")
 DEPLOYMENT_NAME = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME")
-
-#AZURE_ENDPOINT = "https://stenindata-openai-1.openai.azure.com/"
-#model_name = "gpt-4o-mini"
-#DEPLOYMENT_NAME = "gpt-4o-mini"
-#API_VERSION = "2024-12-01-preview"
 API_VERSION = os.getenv("AZURE_OPENAI_API_VERSION", "2023-12-01-preview")
 
 client = AzureOpenAI(
