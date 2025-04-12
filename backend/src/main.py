@@ -40,7 +40,8 @@ def read_root():
 # === Game Start ===
 @app.post("/start_game")
 async def start_game(req: StartGameRequest):
-    game_id = str(uuid4())
+    #game_id = str(uuid4())
+    game_id = "c279f5ec-3329-42e6-b251-50cb484b9d40"
     ai_response = await generate_initial_game(req.seed_prompt)
     print(ai_response)
     game_data = ai_response
