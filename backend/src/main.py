@@ -22,6 +22,7 @@ class MoveRequest(BaseModel):
     user_id: str
     game_id: str
     direction: str
+    message: str
 
 class ImageGenRequest(BaseModel):
     game_id: str
@@ -157,7 +158,7 @@ async def move_player(req: MoveRequest):
 
     # Compose prompt to generate scene
     composite_prompt = f"""You are an AI narrator in a fantasy game.
-Your player just entered a new location. Based on the intro: "{image_data['prompt']}", describe what they see, hear, and feel in vivid detail."""
+Your player just entered a new location. Based on the intro: "{image_data['prompt']}" and also the latest input msg from user {req.message}, describe what they see, hear, and feel in vivid detail."""
 
     scene_text = ask_azure_openai(composite_prompt)
 
