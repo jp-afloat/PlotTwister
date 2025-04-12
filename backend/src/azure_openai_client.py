@@ -29,6 +29,14 @@ client = AzureOpenAI(
     azure_endpoint=AZURE_ENDPOINT,
 )
 
+def get_image_at_position(game_id: str, x: int, y: int):
+    response = sb.table("map_images").select("*").eq("game_id", game_id).eq("grid_x", x).eq("grid_y", y).execute()
+    if response.data and len(response.data) > 0:
+        return response.data[0]
+    else:
+        return None
+
+
 def ask_azure_openai(prompt: str) -> str:
     response = client.chat.completions.create(
         model=DEPLOYMENT_NAME,
@@ -120,7 +128,8 @@ async def generate_game_images(intro_prompt: str, game_id: str) -> list:
     )
 
     results = []
-    grid_positions = [(x, y) for y in range(3) for x in range(3)]  # (0,0) to (2,2)
+    # Correct grid from (-1,-1) to (1,1)
+    grid_positions = [(x, y) for y in [-1, 0, 1] for x in [-1, 0, 1]]
 
     for i, prompt in enumerate(image_prompts):
         # Generate image from DALL·E

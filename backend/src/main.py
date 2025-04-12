@@ -6,9 +6,9 @@ import json
 import os
 
 from src.supabase_client import supabase as sb
-from src.azure_openai_client import generate_initial_game
+from src.azure_openai_client import generate_initial_game, ask_azure_openai
 from fastapi import HTTPException
-from src.azure_openai_client import generate_game_images
+from src.azure_openai_client import generate_game_images, get_image_at_position
 
 # Load environment variables
 load_dotenv()
@@ -35,9 +35,6 @@ def read_root():
         "supabase_url": os.getenv("SUPABASE_URL"),
         "google_api_key_present": bool(os.getenv("GEMINI_API_KEY")),
     }
-
-
-
 
 # === Game Start ===
 @app.post("/start_game")
@@ -128,5 +125,53 @@ async def generate_images_for_game(req: ImageGenRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@app.post("/move")
+async def move_player(req: MoveRequest):
+    # Get player state
+    res = sb.table("player_state").select("*").eq("game_id", req.game_id).eq("user_id", req.user_id).execute()
+    if not res.data:
+        raise HTTPException(status_code=404, detail="Player not found.")
+
+    player = res.data[0]
+    x, y = player["pos_x"], player["pos_y"]
+
+    # Determine new position
+    direction_map = {
+        "north": (0, -1),
+        "south": (0, 1),
+        "east": (1, 0),
+        "west": (-1, 0),
+    }
+
+    if req.direction not in direction_map:
+        raise HTTPException(status_code=400, detail="Invalid direction.")
+
+    dx, dy = direction_map[req.direction]
+    new_x, new_y = x + dx, y + dy
+
+    # Fetch the image at new position
+    image_data = get_image_at_position(req.game_id, new_x, new_y)
+    if not image_data:
+        raise HTTPException(status_code=404, detail="No image at new position.")
+
+    # Compose prompt to generate scene
+    composite_prompt = f"""You are an AI narrator in a fantasy game.
+Your player just entered a new location. Based on the intro: "{image_data['prompt']}", describe what they see, hear, and feel in vivid detail."""
+
+    scene_text = ask_azure_openai(composite_prompt)
+
+    # Update player position
+    sb.table("player_state").update({
+        "pos_x": new_x,
+        "pos_y": new_y,
+        "history": player["history"] + [{"from": (x, y), "to": (new_x, new_y), "direction": req.direction}]
+    }).eq("id", player["id"]).execute()
+
+    return {
+        "new_position": {"x": new_x, "y": new_y},
+        "image_url": image_data["image_url"],
+        "scene_text": scene_text
+    }
 
 
