@@ -7,7 +7,8 @@ import os
 
 from src.supabase_client import supabase as sb
 from src.azure_openai_client import generate_initial_game
-from src.azure_openai_client import ask_azure_openai
+from fastapi import HTTPException
+from src.azure_openai_client import generate_game_images
 
 # Load environment variables
 load_dotenv()
@@ -21,6 +22,10 @@ class MoveRequest(BaseModel):
     user_id: str
     game_id: str
     direction: str
+
+class ImageGenRequest(BaseModel):
+    game_id: str
+    seed_prompt: str    
 
 app = FastAPI()
 
@@ -95,5 +100,33 @@ async def start_game(req: StartGameRequest):
         "image_url": "https://via.placeholder.com/512",
         "start_position": {"x": 0, "y": 0}
     }
+
+
+@app.post("/generate_game_images")
+async def generate_images_for_game(req: ImageGenRequest):
+    try:
+        images = await generate_game_images(req.seed_prompt, req.game_id)
+
+        # Store each image entry into `map_images` table
+        for img in images:
+            sb.table("map_images").insert({
+                "id": str(uuid4()),
+                "game_id": req.game_id,
+                "prompt": img["prompt"],
+                "image_url": img["image_url"],
+                "grid_x": img["grid_position"]["x"],
+                "grid_y": img["grid_position"]["y"],
+                "location": img.get("location", None)  # Optional if added
+            }).execute()
+
+        return {
+            "status": "success",
+            "game_id": req.game_id,
+            "images": images
+        }
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 

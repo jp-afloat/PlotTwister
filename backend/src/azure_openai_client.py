@@ -89,10 +89,10 @@ async def generate_initial_game(seed_prompt: str) -> dict:
 
         raise ValueError("Could not parse model output into JSON")
 
-async def generate_game_images(seed_prompt: str, game_id: str) -> list:
+async def generate_game_images(intro_prompt: str, game_id: str) -> list:
     # Step 1: Ask GPT to generate 9 location-based image prompts
     gpt_prompt = f"""
-    Based on this world-building prompt: "{seed_prompt}", generate 9 short and vivid image prompts, each describing a unique location in the world.
+    Based on this world-building prompt: "{intro_prompt}", generate 9 short and vivid image prompts, each describing a unique location in the world.
 
     These should be visually distinct and immersive, suitable for DALL·E 3 to render. Return a JSON list of prompts.
     """
